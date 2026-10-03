@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SnapDevorcDB</title>
+<style>
+:root{--blue:#2f6bff;--blue2:#5b8cff;--text:#e8eefc;--muted:#8fa0c4;--card:rgba(15,30,70,.45);--line:rgba(91,140,255,.22)}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);min-height:100vh;
+background:radial-gradient(900px 500px at 15% -5%,#0f2a66 0%,transparent 60%),radial-gradient(700px 500px at 100% 20%,#071433 0%,transparent 60%),linear-gradient(180deg,#050b1c,#000 70%);background-attachment:fixed}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;max-width:1000px;margin:auto}
+.logo{font-weight:800;font-size:1.25rem;letter-spacing:.5px}.logo span{color:var(--blue2)}
+.btn{display:inline-block;border:0;cursor:pointer;text-decoration:none;font-weight:700;border-radius:12px;padding:12px 18px;font-size:.95rem;background:linear-gradient(135deg,var(--blue),#1239a8);color:#fff;box-shadow:0 6px 24px rgba(47,107,255,.35)}
+.btn.off{background:#1a2238;color:#6c7899;box-shadow:none;cursor:not-allowed;pointer-events:none}
+.hero{text-align:center;padding:50px 20px 30px;max-width:720px;margin:auto}
+.hero h1{font-size:clamp(2rem,7vw,3.4rem);line-height:1.1}
+.hero h1 span{background:linear-gradient(90deg,var(--blue2),#9db8ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);margin:16px 0 26px}
+main{max-width:1000px;margin:auto;padding:10px 20px 60px}
+h2{margin:30px 0 14px;font-size:1.3rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:16px}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;backdrop-filter:blur(8px);display:flex;flex-direction:column;gap:10px}
+.card.out{opacity:.6}
+.tag{font-size:.72rem;color:var(--blue2);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.card h3{font-size:1.1rem}.card p{color:var(--muted);font-size:.9rem;flex:1}
+.price{font-size:1.5rem;font-weight:800}
+.old{font-size:.95rem;color:var(--muted);text-decoration:line-through;font-weight:500;margin-right:8px}
+.badge{position:absolute;top:14px;right:14px;font-size:.7rem;font-weight:800;padding:4px 9px;border-radius:99px}
+.badge.promo{background:#1e6bff;color:#fff}.badge.out{background:#3a1a22;color:#ff8da1}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:7px 14px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;font-size:.85rem}
+.chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+footer{text-align:center;color:var(--muted);padding:30px;font-size:.85rem}
+footer a{color:var(--muted)}
+.empty{color:var(--muted);padding:20px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Snap<span>DevorcDB</span></div>
+  <a class="btn" href="https://instagram.com/snapdevorcdb" target="_blank" rel="noopener">Instagram @snapdevorcdb</a>
+</header>
+<section class="hero">
+  <h1>Bem-vindo à <span>SnapDevorcDB</span></h1>
+  <p>Scripts, números virtuais e consultas. Escolha o produto e finalize a compra direto pelo Instagram.</p>
+  <a class="btn" href="https://ig.me/m/snapdevorcdb" target="_blank" rel="noopener">Comprar pelo Instagram</a>
+</section>
+<main>
+  <h2>Produtos</h2>
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+</main>
+<footer>© SnapDevorcDB · <a href="admin.html">Admin</a></footer>
+
+<script>
+const KEY="sdb_data_v5", IG="https://ig.me/m/snapdevorcdb";
+const DEFAULTS=[
+ {id:1,name:"Script",price:25,promo:0,cat:"Script",desc:"Descreva aqui o script.",stock:true,hidden:false},
+ {id:2,name:"Número virtual",price:20,promo:0,cat:"Número virtual",desc:"Descreva aqui o serviço.",stock:true,hidden:false},
+ {id:3,name:"Consulta individual",price:10,promo:0,cat:"Consulta",desc:"Consulta individual.",stock:true,hidden:false}
+];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const brl=n=>"R$ "+Number(n).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const eff=p=>(p.promo>0&&p.promo<p.price)?p.promo:p.price;
+let products=[],cat="Todos";
+async function load(){
+ try{const l=localStorage.getItem(KEY);if(l)return JSON.parse(l)}catch(e){}
+ try{const r=await fetch("produtos.json",{cache:"no-store"});if(r.ok)return await r.json()}catch(e){}
+ return DEFAULTS;
+}
+function render(){
+ const vis=products.filter(p=>!p.hidden);
+ const cats=["Todos",...new Set(vis.map(p=>p.cat))];
+ $("filters").innerHTML=cats.map(c=>`<button class="chip ${c===cat?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+ $("filters").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{cat=b.dataset.c;render()});
+ const list=vis.filter(p=>cat==="Todos"||p.cat===cat);
+ $("grid").innerHTML=list.length?list.map(p=>{
+  const promo=eff(p)<p.price, out=p.stock===false;
+  const msg=encodeURIComponent(`Olá! Tenho interesse em: ${p.name} (${brl(eff(p))})`);
+  return `<div class="card ${out?'out':''}">
+   ${out?'<span class="badge out">ESGOTADO</span>':promo?`<span class="badge promo">-${Math.round((1-p.promo/p.price)*100)}%</span>`:''}
+   <div class="tag">${esc(p.cat)}</div><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p>
+   <div class="price">${promo?`<span class="old">${brl(p.price)}</span>`:''}${brl(eff(p))}</div>
+   ${out?'<span class="btn off">Esgotado</span>':`<a class="btn" target="_blank" rel="noopener" href="${IG}?text=${msg}">Comprar</a>`}</div>`}).join(""):`<div class="empty">Nenhum produto disponível.</div>`;
+}
+load().then(d=>{products=d;render()});
+</script>
+</body>
+</html>

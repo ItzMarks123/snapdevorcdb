@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin · SnapDevorcDB</title>
+<style>
+:root{--blue:#2f6bff;--blue2:#5b8cff;--text:#e8eefc;--muted:#8fa0c4;--card:rgba(15,30,70,.45);--line:rgba(91,140,255,.22)}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);min-height:100vh;
+background:radial-gradient(900px 500px at 15% -5%,#0f2a66 0%,transparent 60%),linear-gradient(180deg,#050b1c,#000 70%);background-attachment:fixed}
+.wrap{max-width:1000px;margin:auto;padding:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.logo{font-weight:800;font-size:1.2rem}.logo span{color:var(--blue2)}
+.btn{display:inline-block;border:0;cursor:pointer;text-decoration:none;font-weight:700;border-radius:10px;padding:10px 16px;font-size:.88rem;background:linear-gradient(135deg,var(--blue),#1239a8);color:#fff}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn.red{background:#5a1220}.btn.green{background:#0f4d2e}.btn.sm{padding:6px 10px;font-size:.78rem;border-radius:8px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;backdrop-filter:blur(8px)}
+.login{max-width:360px;margin:12vh auto}
+input,select,textarea{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:#050b1c;color:var(--text);font:inherit;margin-bottom:10px}
+label{font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat b{font-size:1.5rem;display:block}.stat span{color:var(--muted);font-size:.78rem}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.info b{display:block}.info small{color:var(--muted)}
+.pill{font-size:.68rem;font-weight:800;padding:3px 8px;border-radius:99px;margin-left:6px}
+.pill.p{background:#1e6bff}.pill.o{background:#3a1a22;color:#ff8da1}.pill.h{background:#2a2f3f;color:#aab}
+.err{color:#ff8da1;font-size:.85rem;margin-bottom:8px;min-height:1em}
+.warn{background:#3a2a0f;border:1px solid #6b4b12;color:#ffd48a;padding:10px 14px;border-radius:12px;font-size:.85rem;margin-bottom:16px}
+.hide{display:none}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="loginView" class="wrap">
+  <div class="box login">
+    <div class="logo" style="margin-bottom:6px">Snap<span>DevorcDB</span> · Admin</div>
+    <p id="lTitle" style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Entrar</p>
+    <label>Usuário</label><input id="lUser" autocomplete="username">
+    <label>Senha</label><input id="lPass" type="password" autocomplete="current-password">
+    <div id="confWrap" class="hide"><label>Confirmar senha</label><input id="lPass2" type="password" autocomplete="new-password"></div>
+    <p id="lHint" class="hide" style="color:var(--muted);font-size:.75rem;margin-bottom:10px">Primeiro acesso: crie seu login. Senha com no mínimo 10 caracteres, letras e números.</p>
+    <div class="err" id="lErr"></div>
+    <button class="btn" id="lBtn" style="width:100%">Entrar</button>
+    <p style="margin-top:14px;font-size:.8rem"><a href="index.html" style="color:var(--muted)">← Voltar à loja</a></p>
+  </div>
+</div>
+
+<div id="panelView" class="wrap hide">
+  <div class="top">
+    <div class="logo">Snap<span>DevorcDB</span> · Painel</div>
+    <div class="row">
+      <a class="btn ghost" href="index.html" target="_blank">Ver loja</a>
+      <button class="btn ghost" id="bPass">Trocar login/senha</button>
+      <button class="btn ghost" id="bExp">Exportar produtos.json</button>
+      <button class="btn ghost" id="bImp">Importar</button>
+      <button class="btn red" id="bOut">Sair</button>
+    </div>
+  </div>
+  <input type="file" id="file" accept=".json" class="hide">
+  <div class="box hide" id="passBox">
+    <h3 style="margin-bottom:12px">Trocar login e senha</h3>
+    <label>Senha atual</label><input id="cCur" type="password" autocomplete="current-password">
+    <div class="g3">
+      <div><label>Novo usuário</label><input id="cUser" autocomplete="username"></div>
+      <div><label>Nova senha</label><input id="cNew" type="password" autocomplete="new-password"></div>
+      <div><label>Confirmar nova senha</label><input id="cNew2" type="password" autocomplete="new-password"></div>
+    </div>
+    <div class="err" id="cErr"></div>
+    <div class="row"><button class="btn" id="cSave">Salvar</button><button class="btn ghost" id="cCancel">Cancelar</button></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="sTot">0</b><span>Produtos</span></div>
+    <div class="stat"><b id="sPromo">0</b><span>Em promoção</span></div>
+    <div class="stat"><b id="sOut">0</b><span>Esgotados</span></div>
+    <div class="stat"><b id="sHid">0</b><span>Ocultos</span></div>
+  </div>
+
+  <div class="box">
+    <h3 id="fTitle" style="margin-bottom:12px">Adicionar produto</h3>
+    <label>Nome</label><input id="fName">
+    <div class="g3">
+      <div><label>Preço (R$)</label><input id="fPrice" type="number" step="0.01" min="0"></div>
+      <div><label>Preço promocional (R$) — opcional</label><input id="fPromo" type="number" step="0.01" min="0"></div>
+      <div><label>Categoria</label><input id="fCat" list="cats" placeholder="Ex.: Script"><datalist id="cats"></datalist></div>
+    </div>
+    <label>Descrição</label><textarea id="fDesc" rows="3"></textarea>
+    <div class="row">
+      <button class="btn" id="fSave">Salvar produto</button>
+      <button class="btn ghost" id="fCancel">Limpar</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3 style="margin-bottom:6px">Produtos</h3>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+const KEY="sdb_data_v5", AUTH="sdb_auth_v2", SESS="sdb_session", ATT="sdb_attempts";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const brl=n=>"R$ "+Number(n).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const enc=new TextEncoder(), ITER=310000;
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+const unhex=h=>new Uint8Array(h.match(/../g).map(x=>parseInt(x,16)));
+async function derive(pass,saltHex){
+ const key=await crypto.subtle.importKey("raw",enc.encode(pass),"PBKDF2",false,["deriveBits"]);
+ return hex(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:unhex(saltHex),iterations:ITER},key,256));
+}
+function same(a,b){if(a.length!==b.length)return false;let r=0;for(let i=0;i<a.length;i++)r|=a.charCodeAt(i)^b.charCodeAt(i);return r===0}
+async function mkAuth(user,pass){const salt=hex(crypto.getRandomValues(new Uint8Array(16)));return{user,salt,h:await derive(pass,salt)}}
+const okPass=p=>p.length>=10&&/[A-Za-z]/.test(p)&&/\d/.test(p);
+const DEFAULTS=[
+ {id:1,name:"Script",price:25,promo:0,cat:"Script",desc:"Descreva aqui o script.",stock:true,hidden:false},
+ {id:2,name:"Número virtual",price:20,promo:0,cat:"Número virtual",desc:"Descreva aqui o serviço.",stock:true,hidden:false},
+ {id:3,name:"Consulta individual",price:10,promo:0,cat:"Consulta",desc:"Consulta individual.",stock:true,hidden:false}
+];
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){alert("Não foi possível salvar neste navegador.")}}};
+let auth=ls.get(AUTH,null);
+let products=ls.get(KEY,null)||DEFAULTS, editing=null;
+const save=()=>ls.set(KEY,products);
+const sess=()=>{try{return Number(sessionStorage.getItem(SESS)||0)>Date.now()}catch(e){return false}};
+const startSess=()=>{try{sessionStorage.setItem(SESS,String(Date.now()+30*60*1000))}catch(e){}};
+const waitSecs=()=>{const a=ls.get(ATT,{n:0,until:0});return Math.max(0,Math.ceil((a.until-Date.now())/1000))};
+const failed=()=>{const a=ls.get(ATT,{n:0,until:0});a.n++;if(a.n>=5)a.until=Date.now()+Math.min(3600,30*2**(a.n-5))*1000;ls.set(ATT,a)};
+
+function show(){
+ const ok=sess();
+ $("loginView").classList.toggle("hide",ok);$("panelView").classList.toggle("hide",!ok);
+ if(ok){render()}
+ else{
+  const setup=!auth;
+  $("lTitle").textContent=setup?"Criar acesso de administrador":"Entrar";
+  $("confWrap").classList.toggle("hide",!setup);$("lHint").classList.toggle("hide",!setup);
+  $("lBtn").textContent=setup?"Criar e entrar":"Entrar";
+  $("lPass").autocomplete=setup?"new-password":"current-password";
+ }
+}
+$("lBtn").onclick=login;
+["lUser","lPass","lPass2"].forEach(i=>$(i).onkeydown=e=>{if(e.key==="Enter")login()});
+async function login(){
+ const err=$("lErr");err.textContent="";
+ if(!window.crypto||!crypto.subtle)return err.textContent="Este navegador exige HTTPS (ou localhost) para o login seguro.";
+ const u=$("lUser").value.trim(),p=$("lPass").value;
+ $("lBtn").disabled=true;
+ try{
+  if(!auth){
+   if(u.length<3)return err.textContent="Usuário com pelo menos 3 caracteres.";
+   if(!okPass(p))return err.textContent="Senha: mínimo 10 caracteres, com letras e números.";
+   if(p!==$("lPass2").value)return err.textContent="As senhas não conferem.";
+   auth=await mkAuth(u,p);ls.set(AUTH,auth);
+  }else{
+   const w=waitSecs();if(w)return err.textContent=`Muitas tentativas. Aguarde ${w}s.`;
+   const h=await derive(p,auth.salt);
+   if(!(same(h,auth.h)&&u===auth.user)){failed();return err.textContent="Usuário ou senha incorretos."}
+   ls.set(ATT,{n:0,until:0});
+  }
+  ["lPass","lPass2"].forEach(i=>$(i).value="");startSess();show();
+ }finally{$("lBtn").disabled=false}
+}
+$("bOut").onclick=()=>{try{sessionStorage.removeItem(SESS)}catch(e){}show()};
+$("bPass").onclick=()=>{$("cUser").value=auth.user;$("passBox").classList.toggle("hide")};
+$("cCancel").onclick=()=>{$("passBox").classList.add("hide");["cCur","cNew","cNew2","cErr"].forEach(i=>{$(i).value="";$(i).textContent=""})};
+$("cSave").onclick=async()=>{
+ const err=$("cErr");err.textContent="";
+ const u=$("cUser").value.trim(),p=$("cNew").value;
+ if(!(same(await derive($("cCur").value,auth.salt),auth.h)))return err.textContent="Senha atual incorreta.";
+ if(u.length<3)return err.textContent="Usuário com pelo menos 3 caracteres.";
+ if(!okPass(p))return err.textContent="Senha: mínimo 10 caracteres, com letras e números.";
+ if(p!==$("cNew2").value)return err.textContent="As senhas não conferem.";
+ auth=await mkAuth(u,p);ls.set(AUTH,auth);$("cCancel").click();alert("Login atualizado.");
+};
+document.addEventListener("click",()=>{if(sess())startSess()});
+setInterval(()=>{if(!$("panelView").classList.contains("hide")&&!sess())show()},15000);
+
+function render(){
+ $("sTot").textContent=products.length;
+ $("sPromo").textContent=products.filter(p=>p.promo>0&&p.promo<p.price).length;
+ $("sOut").textContent=products.filter(p=>p.stock===false).length;
+ $("sHid").textContent=products.filter(p=>p.hidden).length;
+ $("cats").innerHTML=[...new Set(products.map(p=>p.cat))].map(c=>`<option value="${esc(c)}">`).join("");
+ $("list").innerHTML=products.length?products.map(p=>{
+  const promo=p.promo>0&&p.promo<p.price;
+  return `<div class="item"><div class="info"><b>${esc(p.name)}
+   ${promo?'<span class="pill p">PROMO</span>':''}${p.stock===false?'<span class="pill o">ESGOTADO</span>':''}${p.hidden?'<span class="pill h">OCULTO</span>':''}</b>
+   <small>${esc(p.cat)} · ${promo?`<s>${brl(p.price)}</s> ${brl(p.promo)}`:brl(p.price)}</small></div>
+   <div class="row">
+    <button class="btn ghost sm" onclick="edit(${p.id})">Editar</button>
+    <button class="btn ${p.stock===false?'green':'ghost'} sm" onclick="tog(${p.id},'stock')">${p.stock===false?'Repor estoque':'Marcar esgotado'}</button>
+    <button class="btn ghost sm" onclick="tog(${p.id},'hidden')">${p.hidden?'Mostrar':'Ocultar'}</button>
+    <button class="btn ghost sm" onclick="quickPromo(${p.id})">${promo?'Alterar promo':'Promoção'}</button>
+    <button class="btn red sm" onclick="del(${p.id})">Remover</button>
+   </div></div>`}).join(""):'<p style="color:var(--muted);padding:12px 0">Nenhum produto cadastrado.</p>';
+}
+function clearForm(){editing=null;["fName","fPrice","fPromo","fCat","fDesc"].forEach(i=>$(i).value="");$("fTitle").textContent="Adicionar produto"}
+window.edit=id=>{const p=products.find(x=>x.id===id);editing=id;$("fName").value=p.name;$("fPrice").value=p.price;$("fPromo").value=p.promo||"";$("fCat").value=p.cat;$("fDesc").value=p.desc;$("fTitle").textContent="Editar produto";window.scrollTo({top:0,behavior:"smooth"})};
+window.tog=(id,k)=>{const p=products.find(x=>x.id===id);if(k==="stock")p.stock=(p.stock===false);else p.hidden=!p.hidden;save();render()};
+window.quickPromo=id=>{
+ const p=products.find(x=>x.id===id);
+ const v=prompt(`Preço promocional de "${p.name}" em R$ (deixe vazio ou 0 para remover a promoção):`,p.promo||"");
+ if(v===null)return;const n=parseFloat(String(v).replace(",","."))||0;
+ if(n>=p.price)return alert("O preço promocional precisa ser menor que o preço normal.");
+ p.promo=n;save();render();
+};
+window.del=id=>{const p=products.find(x=>x.id===id);if(confirm(`Remover "${p.name}"?`)){products=products.filter(x=>x.id!==id);save();render()}};
+$("fSave").onclick=()=>{
+ const name=$("fName").value.trim(),price=parseFloat($("fPrice").value),promo=parseFloat($("fPromo").value)||0;
+ if(!name)return alert("Informe o nome.");
+ if(isNaN(price)||price<0)return alert("Informe um preço válido.");
+ if(promo&&promo>=price)return alert("O preço promocional precisa ser menor que o preço normal.");
+ const item={name,price,promo,cat:$("fCat").value.trim()||"Outro",desc:$("fDesc").value.trim()};
+ if(editing)products=products.map(p=>p.id===editing?{...p,...item}:p);
+ else products.push({id:Date.now(),stock:true,hidden:false,...item});
+ save();clearForm();render();
+};
+$("fCancel").onclick=clearForm;
+
+$("bExp").onclick=()=>{
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(products,null,2)],{type:"application/json"}));
+ a.download="produtos.json";a.click();
+};
+$("bImp").onclick=()=>$("file").click();
+$("file").onchange=e=>{
+ const f=e.target.files[0];if(!f)return;
+ const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;products=d;save();render();alert("Catálogo importado.")}catch(x){alert("Arquivo inválido.")}};r.readAsText(f);e.target.value="";
+};
+show();
+</script>
+</body>
+</html>
